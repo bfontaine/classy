@@ -379,6 +379,8 @@ func (cls *jclass) resolveConstantIndex(index int) jconst {
 }
 
 func (cst jconst) valueAsString() string {
+	// note: this won't work in some case since Java uses a modified version of
+	// UTF-8
 	return string(cst.value)
 }
 
@@ -466,8 +468,8 @@ func (cls *jclass) ClassName() string {
 
 func printClass(filename string, cls jclass) {
 	fmt.Printf("%s:\n"+
-		"  class:  %s\n"+
-		"  version:  %s\n"+
+		"  class: %s\n"+
+		"  version: %s\n"+
 		"  access: %s\n"+
 		"  constants:\n%s\n",
 		filename,
