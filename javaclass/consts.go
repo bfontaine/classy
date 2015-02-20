@@ -24,7 +24,7 @@ const (
 )
 
 type JConst struct {
-	tag   int
+	tag   u1
 	value []byte
 }
 

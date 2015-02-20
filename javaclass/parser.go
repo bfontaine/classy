@@ -31,10 +31,14 @@ func readBinary(r io.Reader, data interface{}) error {
 	return binary.Read(r, binary.BigEndian, data)
 }
 
+func bytesToU2(buf []byte) u2 {
+	return u2((buf[0] << 8) + buf[1])
+}
+
 func bytesToInt(buf []byte) int {
 	intVal := 0
 
-	// not sure this work with negative numbers
+	// not sure this works with negative numbers
 	for _, b := range buf {
 		// big endian
 		intVal <<= 8
@@ -54,7 +58,27 @@ func readInt(r io.Reader, data *int, length int) error {
 	return nil
 }
 
-func setFlag(n int, magic int, flag *bool) {
+func readU2(r io.Reader, data *u2) error {
+	buf := make([]byte, 2)
+	if err := readBinary(r, buf); err != nil {
+		return err
+	}
+
+	*data = u2(buf[0]<<8 + buf[1])
+	return nil
+}
+
+func readU1(r io.Reader, data *u1) error {
+	buf := make([]byte, 1)
+	if err := readBinary(r, buf); err != nil {
+		return err
+	}
+
+	*data = u1(buf[0])
+	return nil
+}
+
+func setFlag(n u2, magic u2, flag *bool) {
 	*flag = n&magic == magic
 }
 
@@ -93,18 +117,18 @@ func ParseClassFromFile(f *os.File) (JClass, error) {
 	cls := JClass{}
 
 	// minor version number
-	if err := readInt(f, &cls.minorVersion, 2); err != nil {
+	if err := readU2(f, &cls.minorVersion); err != nil {
 		return cls, err
 	}
 
 	// major version number
-	if err := readInt(f, &cls.majorVersion, 2); err != nil {
+	if err := readU2(f, &cls.majorVersion); err != nil {
 		return cls, err
 	}
 
 	// constant pool size
-	var constantPoolSize int
-	if err := readInt(f, &constantPoolSize, 2); err != nil {
+	var constantPoolSize u2
+	if err := readU2(f, &constantPoolSize); err != nil {
 		return cls, err
 	}
 
@@ -114,27 +138,27 @@ func ParseClassFromFile(f *os.File) (JClass, error) {
 	}
 
 	// access flags
-	var accessFlags int
-	if err := readInt(f, &accessFlags, 2); err != nil {
+	var accessFlags u2
+	if err := readU2(f, &accessFlags); err != nil {
 		return cls, err
 	}
 	cls.setAccessFlags(accessFlags)
 
 	// this class
-	if err := readInt(f, &cls.classIndex, 2); err != nil {
+	if err := readU2(f, &cls.classIndex); err != nil {
 		return cls, err
 	}
 
 	// super class
-	if err := readInt(f, &cls.superClassIndex, 2); err != nil {
+	if err := readU2(f, &cls.superClassIndex); err != nil {
 		return cls, err
 	}
 
 	/* TODO
 
 	// interfaces
-	var interfacesCount int
-	if err := readInt(f, &interfacesCount, 2); err != nil {
+	var interfacesCount u2
+	if err := readU2(f, &interfacesCount); err != nil {
 		return cls, err
 	}
 
@@ -144,8 +168,8 @@ func ParseClassFromFile(f *os.File) (JClass, error) {
 	}
 
 	// fields
-	var fieldsCount int
-	if err := readInt(f, &fieldsCount, 2); err != nil {
+	var fieldsCount u2
+	if err := readU2(f, &fieldsCount); err != nil {
 		return cls, err
 	}
 
@@ -155,8 +179,8 @@ func ParseClassFromFile(f *os.File) (JClass, error) {
 	}
 
 	// methods
-	var methodsCount int
-	if err := readInt(f, &methodsCount, 2); err != nil {
+	var methodsCount u2
+	if err := readU2(f, &methodsCount); err != nil {
 		return cls, err
 	}
 
@@ -166,8 +190,8 @@ func ParseClassFromFile(f *os.File) (JClass, error) {
 	}
 
 	// attributes
-	var attrsCount int
-	if err := readInt(f, &attrsCount, 2); err != nil {
+	var attrsCount u2
+	if err := readU2(f, &attrsCount); err != nil {
 		return cls, err
 	}
 

@@ -19,9 +19,13 @@ const (
 	ACC_ENUM       = 0x4000
 )
 
+type u1 uint8
+type u2 uint16
+type u4 uint32
+
 type JClass struct {
-	majorVersion int
-	minorVersion int
+	majorVersion u2
+	minorVersion u2
 
 	publicFlag    bool
 	finalFlag     bool
@@ -31,33 +35,36 @@ type JClass struct {
 
 	constants []JConst
 
-	classIndex      int
-	superClassIndex int
+	classIndex      u2
+	superClassIndex u2
+
+	interfaces []u2
 }
 
-func (cls *JClass) initConstantPool(size int) {
+func (cls *JClass) initConstantPool(size u2) {
 	cls.constants = make([]JConst, size)
 }
 
-func (cls *JClass) addConstant(index, tag int, data []byte) {
+func (cls *JClass) addConstant(index u2, tag u1, data []byte) {
 	cls.constants[index] = JConst{tag, data}
 }
 
-func (cls *JClass) parseConstantPool(constantPoolSize int, r io.Reader) error {
+func (cls *JClass) parseConstantPool(constantPoolSize u2, r io.Reader) error {
 
-	var tag, size int
+	var tag u1
+	var size, index u2
 	var data []byte
 
 	cls.initConstantPool(constantPoolSize)
 
-	for index := 1; index < constantPoolSize; index++ {
-		if err := readInt(r, &tag, 1); err != nil {
+	for index = 1; index < constantPoolSize; index++ {
+		if err := readU1(r, &tag); err != nil {
 			return err
 		}
 
 		switch tag {
 		case TAG_STRING:
-			if err := readInt(r, &size, 2); err != nil {
+			if err := readU2(r, &size); err != nil {
 				return err
 			}
 
@@ -108,7 +115,7 @@ func (cls *JClass) parseConstantPool(constantPoolSize int, r io.Reader) error {
 	return nil
 }
 
-func (cls *JClass) setAccessFlags(accessFlags int) {
+func (cls *JClass) setAccessFlags(accessFlags u2) {
 	setFlag(accessFlags, ACC_PUBLIC, &cls.publicFlag)
 	setFlag(accessFlags, ACC_FINAL, &cls.finalFlag)
 	setFlag(accessFlags, ACC_SUPER, &cls.superFlag)
@@ -158,7 +165,7 @@ func (cls *JClass) StringFlags() string {
 	return buffer.String()
 }
 
-func (cls *JClass) resolveConstantIndex(index int) JConst {
+func (cls *JClass) resolveConstantIndex(index u2) JConst {
 	cst := cls.constants[index]
 
 	switch cst.tag {
@@ -167,7 +174,7 @@ func (cls *JClass) resolveConstantIndex(index int) JConst {
 	case TAG_STRING_REF:
 		fallthrough
 	case TAG_METHOD_TYPE:
-		return cls.resolveConstantIndex(bytesToInt(cst.value))
+		return cls.resolveConstantIndex(bytesToU2(cst.value))
 	default:
 		return cst
 	}
