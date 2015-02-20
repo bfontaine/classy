@@ -62,6 +62,9 @@ type jclass struct {
 	abstractFlag  bool
 
 	constants []jconst
+
+	classIndex      int
+	superClassIndex int
 }
 
 func readBytes(f *os.File, buff []byte) error {
@@ -246,21 +249,17 @@ func inspectFilename(source string) (jclass, error) {
 	}
 	cls.SetAccessFlags(accessFlags)
 
-	/* TODO
-
 	// this class
-	var classIndex int
-	if err := readInt(f, &classIndex, 2); err != nil {
+	if err := readInt(f, &cls.classIndex, 2); err != nil {
 		return cls, err
 	}
-	// TODO
 
 	// super class
-	var superClassIndex int
-	if err := readInt(f, &superClassIndex, 2); err != nil {
+	if err := readInt(f, &cls.superClassIndex, 2); err != nil {
 		return cls, err
 	}
-	// TODO
+
+	/* TODO
 
 	// interfaces
 	var interfacesCount int
@@ -364,6 +363,21 @@ func (cls *jclass) StringFlags() string {
 	return buffer.String()
 }
 
+func (cls *jclass) resolveConstantIndex(index int) jconst {
+	cst := cls.constants[index]
+
+	switch cst.tag {
+	case TAG_CLASS_REF:
+		fallthrough
+	case TAG_STRING_REF:
+		fallthrough
+	case TAG_METHOD_TYPE:
+		return cls.resolveConstantIndex(bytesToInt(cst.value))
+	default:
+		return cst
+	}
+}
+
 func (cst jconst) valueAsString() string {
 	return string(cst.value)
 }
@@ -446,12 +460,21 @@ func (cls *jclass) StringConstantsIndent(indent int) string {
 	return buffer.String()
 }
 
+func (cls *jclass) ClassName() string {
+	return cls.resolveConstantIndex(cls.classIndex).valueAsString()
+}
+
 func printClass(filename string, cls jclass) {
 	fmt.Printf("%s:\n"+
+		"  class:  %s\n"+
 		"  version:  %s\n"+
 		"  access: %s\n"+
 		"  constants:\n%s\n",
-		filename, cls.Version(), cls.StringFlags(), cls.StringConstantsIndent(4))
+		filename,
+		cls.ClassName(),
+		cls.Version(),
+		cls.StringFlags(),
+		cls.StringConstantsIndent(4))
 }
 
 func main() {
