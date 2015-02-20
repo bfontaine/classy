@@ -5,9 +5,9 @@ package main
 //  - http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4
 
 import (
-	"./javaclass"
 	"flag"
 	"fmt"
+	"github.com/bfontaine/goclassy/javaclass"
 	"os"
 )
 

@@ -48,9 +48,18 @@ func bytesToInt(buf []byte) int {
 	return intVal
 }
 
-func readU2(r io.Reader, data *u2) error {
-	buf := make([]byte, 2)
+func readBinaryBuffer(r io.Reader, size int) ([]byte, error) {
+	buf := make([]byte, size)
 	if err := readBinary(r, buf); err != nil {
+		return buf, err
+	}
+	return buf, nil
+}
+
+func readU2(r io.Reader, data *u2) error {
+	buf, err := readBinaryBuffer(r, 2)
+
+	if err != nil {
 		return err
 	}
 
@@ -59,8 +68,9 @@ func readU2(r io.Reader, data *u2) error {
 }
 
 func readU1(r io.Reader, data *u1) error {
-	buf := make([]byte, 1)
-	if err := readBinary(r, buf); err != nil {
+	buf, err := readBinaryBuffer(r, 2)
+
+	if err != nil {
 		return err
 	}
 
