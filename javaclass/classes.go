@@ -12,11 +12,7 @@ type JClass struct {
 	majorVersion u2
 	minorVersion u2
 
-	publicFlag    bool
-	finalFlag     bool
-	superFlag     bool
-	interfaceFlag bool
-	abstractFlag  bool
+	accessFlags u2
 
 	constants []JConst
 
@@ -100,16 +96,8 @@ func (cls *JClass) parseConstantPool(constantPoolSize u2, r io.Reader) error {
 	return nil
 }
 
-func (cls *JClass) setAccessFlags(accessFlags u2) {
-	setFlag(accessFlags, ACC_PUBLIC, &cls.publicFlag)
-	setFlag(accessFlags, ACC_FINAL, &cls.finalFlag)
-	setFlag(accessFlags, ACC_SUPER, &cls.superFlag)
-	setFlag(accessFlags, ACC_INTERFACE, &cls.interfaceFlag)
-	setFlag(accessFlags, ACC_ABSTRACT, &cls.abstractFlag)
-}
-
 func (cls *JClass) Version() string {
-	// we don't use the minor version here
+	// we could also use the minor version here
 	switch cls.majorVersion {
 	case 45:
 		return "JDK 1.1"
@@ -131,19 +119,23 @@ func (cls *JClass) Version() string {
 	return "Unknown version"
 }
 
+func (cls *JClass) hasAccessFlag(flag u2) bool {
+	return cls.accessFlags&flag == flag
+}
+
 func (cls *JClass) StringFlags() string {
 	var buffer bytes.Buffer
 
-	if cls.publicFlag {
+	if cls.hasAccessFlag(ACC_PUBLIC) {
 		buffer.WriteString("public ")
 	}
-	if cls.finalFlag {
+	if cls.hasAccessFlag(ACC_FINAL) {
 		buffer.WriteString("final ")
 	}
-	if cls.interfaceFlag {
+	if cls.hasAccessFlag(ACC_INTERFACE) {
 		buffer.WriteString("interface ")
 	}
-	if cls.abstractFlag {
+	if cls.hasAccessFlag(ACC_ABSTRACT) {
 		buffer.WriteString("abstract ")
 	}
 

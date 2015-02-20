@@ -78,15 +78,6 @@ func readU1(r io.Reader, data *u1) error {
 	return nil
 }
 
-func setFlag(n u2, magic u2, flag *bool) {
-	*flag = n&magic == magic
-}
-
-func parseInterfaces(cls *JClass, interfaces []byte) error {
-	// TODO
-	return nil
-}
-
 func parseFields(cls *JClass, fields []byte) error {
 	// TODO
 	return nil
@@ -138,11 +129,9 @@ func ParseClassFromFile(f *os.File) (JClass, error) {
 	}
 
 	// access flags
-	var accessFlags u2
-	if err := readU2(f, &accessFlags); err != nil {
+	if err := readU2(f, &cls.accessFlags); err != nil {
 		return cls, err
 	}
-	cls.setAccessFlags(accessFlags)
 
 	// this class
 	if err := readU2(f, &cls.classIndex); err != nil {
