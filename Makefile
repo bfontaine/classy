@@ -1,9 +1,11 @@
 BIN=classy
 
+SOURCES=$(wildcard **/*.go)
+
 all: $(BIN)
 
-%: %.go
-	go build $<
+$(BIN): $(SOURCES)
+	go build $(BIN).go
 
 clean:
 	$(RM) $(BIN)
