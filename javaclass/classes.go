@@ -35,6 +35,10 @@ func (cls *JClass) addConstant(index u2, tag u1, data []byte) {
 	cls.constants[index] = JConst{tag, data}
 }
 
+func (cls *JClass) addField(index u2, field JField) {
+	cls.fields[index] = field
+}
+
 func (cls *JClass) Version() string {
 	// we could also use the minor version here
 	switch cls.majorVersion {

@@ -57,6 +57,17 @@ func readBinaryBuffer(r io.Reader, size int) ([]byte, error) {
 	return buf, nil
 }
 
+func readU4(r io.Reader, data *u4) error {
+	buf, err := readBinaryBuffer(r, 4)
+
+	if err != nil {
+		return err
+	}
+
+	*data = u4(buf[0]<<24 + buf[1]<<16 + buf[2]<<8 + buf[3])
+	return nil
+}
+
 func readU2(r io.Reader, data *u2) error {
 	buf, err := readBinaryBuffer(r, 2)
 
@@ -144,8 +155,72 @@ func parseConstantPool(cls *JClass, constantPoolSize u2, r io.Reader) error {
 	return nil
 }
 
-func parseFields(cls *JClass, fieldsSize u2, r io.Reader) error {
-	// TODO
+func parseFieldAttributes(field *JField, attrsCount u2, r io.Reader) error {
+
+	var index u2
+
+	field.initAttributes(attrsCount)
+
+	for index = 0; index < attrsCount; index++ {
+		attr := JAttr{}
+
+		if err := readU2(r, &attr.nameIndex); err != nil {
+			return err
+		}
+
+		var attrLen u4
+		if err := readU4(r, &attrLen); err != nil {
+			return err
+		}
+
+		attr.initInfo(attrLen)
+		if err := readBinary(r, &attr.info); err != nil {
+			return err
+		}
+
+		field.addAttribute(index, attr)
+	}
+
+	return nil
+}
+
+func parseFields(cls *JClass, fieldsCount u2, r io.Reader) error {
+
+	var index u2
+
+	cls.initFields(fieldsCount)
+
+	// accessFlags     u2
+	// nameIndex       u2
+	// descriptorIndex u2
+	// attributes      []JAttr
+
+	for index = 0; index < fieldsCount; index++ {
+		field := JField{}
+
+		if err := readU2(r, &field.accessFlags); err != nil {
+			return err
+		}
+
+		if err := readU2(r, &field.nameIndex); err != nil {
+			return err
+		}
+
+		if err := readU2(r, &field.descriptorIndex); err != nil {
+			return err
+		}
+
+		var attributesCount u2
+		if err := readU2(r, &attributesCount); err != nil {
+			return err
+		}
+
+		if err := parseFieldAttributes(&field, attributesCount, r); err != nil {
+			return err
+		}
+
+		cls.addField(index, field)
+	}
 	return nil
 }
 
