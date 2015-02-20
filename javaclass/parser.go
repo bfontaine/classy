@@ -48,23 +48,13 @@ func bytesToInt(buf []byte) int {
 	return intVal
 }
 
-func readInt(r io.Reader, data *int, length int) error {
-	buf := make([]byte, length)
-	if err := readBinary(r, buf); err != nil {
-		return err
-	}
-
-	*data = bytesToInt(buf)
-	return nil
-}
-
 func readU2(r io.Reader, data *u2) error {
 	buf := make([]byte, 2)
 	if err := readBinary(r, buf); err != nil {
 		return err
 	}
 
-	*data = u2(buf[0]<<8 + buf[1])
+	*data = bytesToU2(buf)
 	return nil
 }
 
