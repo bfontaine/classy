@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 const (
@@ -29,12 +30,26 @@ const (
 	TAG_METHOD_HANDLE        = 15
 	TAG_METHOD_TYPE          = 16
 	TAG_INVOKE_DYN           = 18
+
+	ACC_PUBLIC     = 0x0001
+	ACC_FINAL      = 0x001
+	ACC_SUPER      = 0x0020
+	ACC_INTERFACE  = 0x0200
+	ACC_ABSTRACT   = 0x0400
+	ACC_SYNTHETIC  = 0x1000
+	ACC_ANNOTATION = 0x2000
+	ACC_ENUM       = 0x4000
 )
 
 var (
 	ErrNotEnoughBytes   = errors.New("Can't read enough bytes")
 	ErrWrongMagicNumber = errors.New("Wrong magic number")
 )
+
+type jconst struct {
+	tag   int
+	value []byte
+}
 
 type jclass struct {
 	majorVersion int
@@ -45,6 +60,8 @@ type jclass struct {
 	superFlag     bool
 	interfaceFlag bool
 	abstractFlag  bool
+
+	constants []jconst
 }
 
 func readBytes(f *os.File, buff []byte) error {
@@ -65,30 +82,43 @@ func readBinary(r io.Reader, data interface{}) error {
 	return binary.Read(r, binary.BigEndian, data)
 }
 
-func readInt(r io.Reader, data *int, length int) error {
-	buf := make([]byte, length)
+func bytesToInt(buf []byte) int {
 	intVal := 0
-	if err := readBinary(r, buf); err != nil {
-		return err
-	}
 
+	// not sure this work with negative numbers
 	for _, b := range buf {
+		// big endian
 		intVal <<= 8
 		intVal += int(b)
 	}
 
-	*data = intVal
+	return intVal
+}
+
+func readInt(r io.Reader, data *int, length int) error {
+	buf := make([]byte, length)
+	if err := readBinary(r, buf); err != nil {
+		return err
+	}
+
+	*data = bytesToInt(buf)
 	return nil
 }
 
-func (jc *jclass) addConstant(index, tag, size int, data []byte) {
-	// TODO
+func (jc *jclass) initConstantPool(size int) {
+	jc.constants = make([]jconst, size)
+}
+
+func (jc *jclass) addConstant(index, tag int, data []byte) {
+	jc.constants[index] = jconst{tag, data}
 }
 
 func (jc *jclass) parseConstantPool(constantPoolSize int, r io.Reader) error {
 
 	var tag, size int
 	var data []byte
+
+	jc.initConstantPool(constantPoolSize)
 
 	for index := 1; index < constantPoolSize; index++ {
 		if err := readInt(r, &tag, 1); err != nil {
@@ -142,7 +172,7 @@ func (jc *jclass) parseConstantPool(constantPoolSize int, r io.Reader) error {
 		if err := readBinary(r, &data); err != nil {
 			return err
 		}
-		jc.addConstant(index, tag, size, data)
+		jc.addConstant(index, tag, data)
 	}
 
 	return nil
@@ -285,11 +315,11 @@ func setFlag(n int, magic int, flag *bool) {
 }
 
 func (jc *jclass) SetAccessFlags(accessFlags int) {
-	setFlag(accessFlags, 0x0001, &jc.publicFlag)
-	setFlag(accessFlags, 0x0010, &jc.finalFlag)
-	setFlag(accessFlags, 0x0020, &jc.superFlag)
-	setFlag(accessFlags, 0x0200, &jc.interfaceFlag)
-	setFlag(accessFlags, 0x0400, &jc.abstractFlag)
+	setFlag(accessFlags, ACC_PUBLIC, &jc.publicFlag)
+	setFlag(accessFlags, ACC_FINAL, &jc.finalFlag)
+	setFlag(accessFlags, ACC_SUPER, &jc.superFlag)
+	setFlag(accessFlags, ACC_INTERFACE, &jc.interfaceFlag)
+	setFlag(accessFlags, ACC_ABSTRACT, &jc.abstractFlag)
 }
 
 func (jc *jclass) Version() string {
@@ -334,11 +364,83 @@ func (jc *jclass) StringFlags() string {
 	return buffer.String()
 }
 
+func (jc jconst) valueAsString() string {
+	return string(jc.value)
+}
+
+func (jc jconst) dumpValue(ret interface{}) error {
+	buf := bytes.NewBuffer(jc.value)
+	err := binary.Read(buf, binary.BigEndian, &ret)
+	return err
+}
+
+func (jc jconst) valueAsInt64() uint64 {
+	return binary.BigEndian.Uint64(jc.value)
+}
+
+func (jc jconst) String() string {
+	switch jc.tag {
+	case TAG_STRING:
+		return fmt.Sprintf("String(\"%s\")", jc.valueAsString())
+
+	case TAG_INT:
+		var v int32
+		jc.dumpValue(&v)
+		return fmt.Sprintf("Integer(%d)", v)
+
+	case TAG_FLOAT:
+		var v float32
+		jc.dumpValue(&v)
+		return fmt.Sprintf("Integer(%d)", v)
+
+	case TAG_LONG:
+		var v float64
+		jc.dumpValue(&v)
+		return fmt.Sprintf("Long(%d)", v)
+
+	case TAG_DOUBLE:
+		var v int64
+		jc.dumpValue(&v)
+		return fmt.Sprintf("Double(%d)", v)
+
+	case TAG_CLASS_REF:
+		// TODO
+
+	case TAG_STRING_REF:
+	case TAG_FIELD_REF:
+	case TAG_METHOD_REF:
+	case TAG_INTERFACE_METHOD_REF:
+	case TAG_NAME_TYPE_DESC:
+	case TAG_METHOD_HANDLE:
+	case TAG_METHOD_TYPE:
+	case TAG_INVOKE_DYN:
+	}
+
+	return "(unknown)"
+}
+
+func (jc *jclass) StringConstantsIndent(indent int) string {
+	var buffer bytes.Buffer
+
+	lineStart := strings.Repeat(" ", indent)
+
+	for idx, cst := range jc.constants {
+		if idx == 0 {
+			continue
+		}
+
+		buffer.WriteString(fmt.Sprintf("%s%3d = %v\n", lineStart, idx, cst))
+	}
+
+	return buffer.String()
+}
+
 func printClass(filename string, jc jclass) {
 	fmt.Printf("%s:\n"+
 		"  version:  %s\n"+
-		"  access: %s\n",
-		filename, jc.Version(), jc.StringFlags())
+		"  access: %s\n"+
+		"  constants:\n%s\n",
+		filename, jc.Version(), jc.StringFlags(), jc.StringConstantsIndent(4))
 }
 
 func main() {
