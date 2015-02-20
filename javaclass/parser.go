@@ -68,7 +68,7 @@ func readU2(r io.Reader, data *u2) error {
 }
 
 func readU1(r io.Reader, data *u1) error {
-	buf, err := readBinaryBuffer(r, 2)
+	buf, err := readBinaryBuffer(r, 1)
 
 	if err != nil {
 		return err
