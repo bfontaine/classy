@@ -77,7 +77,6 @@ func (cls *JClass) parseConstantPool(constantPoolSize u2, r io.Reader) error {
 		case TAG_LONG:
 			fallthrough
 		case TAG_DOUBLE:
-			size = 4
 			// 8-bytes constants take two slots in the constant pool table
 			index += 1
 			size = 8
