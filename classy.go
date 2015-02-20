@@ -105,20 +105,20 @@ func readInt(r io.Reader, data *int, length int) error {
 	return nil
 }
 
-func (jc *jclass) initConstantPool(size int) {
-	jc.constants = make([]jconst, size)
+func (cls *jclass) initConstantPool(size int) {
+	cls.constants = make([]jconst, size)
 }
 
-func (jc *jclass) addConstant(index, tag int, data []byte) {
-	jc.constants[index] = jconst{tag, data}
+func (cls *jclass) addConstant(index, tag int, data []byte) {
+	cls.constants[index] = jconst{tag, data}
 }
 
-func (jc *jclass) parseConstantPool(constantPoolSize int, r io.Reader) error {
+func (cls *jclass) parseConstantPool(constantPoolSize int, r io.Reader) error {
 
 	var tag, size int
 	var data []byte
 
-	jc.initConstantPool(constantPoolSize)
+	cls.initConstantPool(constantPoolSize)
 
 	for index := 1; index < constantPoolSize; index++ {
 		if err := readInt(r, &tag, 1); err != nil {
@@ -172,28 +172,28 @@ func (jc *jclass) parseConstantPool(constantPoolSize int, r io.Reader) error {
 		if err := readBinary(r, &data); err != nil {
 			return err
 		}
-		jc.addConstant(index, tag, data)
+		cls.addConstant(index, tag, data)
 	}
 
 	return nil
 }
 
-func parseInterfaces(jc *jclass, interfaces []byte) error {
+func parseInterfaces(cls *jclass, interfaces []byte) error {
 	// TODO
 	return nil
 }
 
-func parseFields(jc *jclass, fields []byte) error {
+func parseFields(cls *jclass, fields []byte) error {
 	// TODO
 	return nil
 }
 
-func parseMethods(jc *jclass, methods []byte) error {
+func parseMethods(cls *jclass, methods []byte) error {
 	// TODO
 	return nil
 }
 
-func parseAttrs(jc *jclass, attrs []byte) error {
+func parseAttrs(cls *jclass, attrs []byte) error {
 	// TODO
 	return nil
 }
@@ -216,115 +216,115 @@ func inspectFilename(source string) (jclass, error) {
 		return jclass{}, ErrWrongMagicNumber
 	}
 
-	jc := jclass{}
+	cls := jclass{}
 
 	// minor version number
-	if err := readInt(f, &jc.minorVersion, 2); err != nil {
-		return jc, err
+	if err := readInt(f, &cls.minorVersion, 2); err != nil {
+		return cls, err
 	}
 
 	// major version number
-	if err := readInt(f, &jc.majorVersion, 2); err != nil {
-		return jc, err
+	if err := readInt(f, &cls.majorVersion, 2); err != nil {
+		return cls, err
 	}
 
 	// constant pool size
 	var constantPoolSize int
 	if err := readInt(f, &constantPoolSize, 2); err != nil {
-		return jc, err
+		return cls, err
 	}
 
 	// constant pool
-	if err := jc.parseConstantPool(constantPoolSize, f); err != nil {
-		return jc, err
+	if err := cls.parseConstantPool(constantPoolSize, f); err != nil {
+		return cls, err
 	}
 
 	// access flags
 	var accessFlags int
 	if err := readInt(f, &accessFlags, 2); err != nil {
-		return jc, err
+		return cls, err
 	}
-	jc.SetAccessFlags(accessFlags)
+	cls.SetAccessFlags(accessFlags)
 
 	/* TODO
 
 	// this class
 	var classIndex int
 	if err := readInt(f, &classIndex, 2); err != nil {
-		return jc, err
+		return cls, err
 	}
 	// TODO
 
 	// super class
 	var superClassIndex int
 	if err := readInt(f, &superClassIndex, 2); err != nil {
-		return jc, err
+		return cls, err
 	}
 	// TODO
 
 	// interfaces
 	var interfacesCount int
 	if err := readInt(f, &interfacesCount, 2); err != nil {
-		return jc, err
+		return cls, err
 	}
 
 	interfaces := make([]byte, interfacesCount)
-	if err := parseInterfaces(&jc, interfaces); err != nil {
-		return jc, err
+	if err := parseInterfaces(&cls, interfaces); err != nil {
+		return cls, err
 	}
 
 	// fields
 	var fieldsCount int
 	if err := readInt(f, &fieldsCount, 2); err != nil {
-		return jc, err
+		return cls, err
 	}
 
 	fields := make([]byte, fieldsCount)
-	if err := parseFields(&jc, fields); err != nil {
-		return jc, err
+	if err := parseFields(&cls, fields); err != nil {
+		return cls, err
 	}
 
 	// methods
 	var methodsCount int
 	if err := readInt(f, &methodsCount, 2); err != nil {
-		return jc, err
+		return cls, err
 	}
 
 	methods := make([]byte, methodsCount)
-	if err := parseMethods(&jc, methods); err != nil {
-		return jc, err
+	if err := parseMethods(&cls, methods); err != nil {
+		return cls, err
 	}
 
 	// attributes
 	var attrsCount int
 	if err := readInt(f, &attrsCount, 2); err != nil {
-		return jc, err
+		return cls, err
 	}
 
 	attrs := make([]byte, attrsCount)
-	if err := parseAttrs(&jc, attrs); err != nil {
-		return jc, err
+	if err := parseAttrs(&cls, attrs); err != nil {
+		return cls, err
 	}
 	*/
 
-	return jc, nil
+	return cls, nil
 }
 
 func setFlag(n int, magic int, flag *bool) {
 	*flag = n&magic == magic
 }
 
-func (jc *jclass) SetAccessFlags(accessFlags int) {
-	setFlag(accessFlags, ACC_PUBLIC, &jc.publicFlag)
-	setFlag(accessFlags, ACC_FINAL, &jc.finalFlag)
-	setFlag(accessFlags, ACC_SUPER, &jc.superFlag)
-	setFlag(accessFlags, ACC_INTERFACE, &jc.interfaceFlag)
-	setFlag(accessFlags, ACC_ABSTRACT, &jc.abstractFlag)
+func (cls *jclass) SetAccessFlags(accessFlags int) {
+	setFlag(accessFlags, ACC_PUBLIC, &cls.publicFlag)
+	setFlag(accessFlags, ACC_FINAL, &cls.finalFlag)
+	setFlag(accessFlags, ACC_SUPER, &cls.superFlag)
+	setFlag(accessFlags, ACC_INTERFACE, &cls.interfaceFlag)
+	setFlag(accessFlags, ACC_ABSTRACT, &cls.abstractFlag)
 }
 
-func (jc *jclass) Version() string {
+func (cls *jclass) Version() string {
 	// we don't use the minor version here
-	switch jc.majorVersion {
+	switch cls.majorVersion {
 	case 45:
 		return "JDK 1.1"
 	case 46:
@@ -345,62 +345,62 @@ func (jc *jclass) Version() string {
 	return "Unknown version"
 }
 
-func (jc *jclass) StringFlags() string {
+func (cls *jclass) StringFlags() string {
 	var buffer bytes.Buffer
 
-	if jc.publicFlag {
+	if cls.publicFlag {
 		buffer.WriteString("public ")
 	}
-	if jc.finalFlag {
+	if cls.finalFlag {
 		buffer.WriteString("final ")
 	}
-	if jc.interfaceFlag {
+	if cls.interfaceFlag {
 		buffer.WriteString("interface ")
 	}
-	if jc.abstractFlag {
+	if cls.abstractFlag {
 		buffer.WriteString("abstract ")
 	}
 
 	return buffer.String()
 }
 
-func (jc jconst) valueAsString() string {
-	return string(jc.value)
+func (cst jconst) valueAsString() string {
+	return string(cst.value)
 }
 
-func (jc jconst) dumpValue(ret interface{}) error {
-	buf := bytes.NewBuffer(jc.value)
+func (cst jconst) dumpValue(ret interface{}) error {
+	buf := bytes.NewBuffer(cst.value)
 	err := binary.Read(buf, binary.BigEndian, &ret)
 	return err
 }
 
-func (jc jconst) valueAsInt64() uint64 {
-	return binary.BigEndian.Uint64(jc.value)
+func (cst jconst) valueAsInt64() uint64 {
+	return binary.BigEndian.Uint64(cst.value)
 }
 
-func (jc jconst) String() string {
-	switch jc.tag {
+func (cst jconst) String() string {
+	switch cst.tag {
 	case TAG_STRING:
-		return jc.valueAsString()
+		return cst.valueAsString()
 
 	case TAG_INT:
 		var v int32
-		jc.dumpValue(&v)
+		cst.dumpValue(&v)
 		return fmt.Sprintf("Integer(%d)", v)
 
 	case TAG_FLOAT:
 		var v float32
-		jc.dumpValue(&v)
+		cst.dumpValue(&v)
 		return fmt.Sprintf("Integer(%d)", v)
 
 	case TAG_LONG:
 		var v float64
-		jc.dumpValue(&v)
+		cst.dumpValue(&v)
 		return fmt.Sprintf("Long(%d)", v)
 
 	case TAG_DOUBLE:
 		var v int64
-		jc.dumpValue(&v)
+		cst.dumpValue(&v)
 		return fmt.Sprintf("Double(%d)", v)
 
 	case TAG_CLASS_REF:
@@ -408,7 +408,7 @@ func (jc jconst) String() string {
 	case TAG_STRING_REF:
 		fallthrough
 	case TAG_METHOD_TYPE:
-		return fmt.Sprintf("#%d", bytesToInt(jc.value))
+		return fmt.Sprintf("#%d", bytesToInt(cst.value))
 
 	case TAG_FIELD_REF:
 		fallthrough
@@ -417,8 +417,8 @@ func (jc jconst) String() string {
 	case TAG_INTERFACE_METHOD_REF:
 		fallthrough
 	case TAG_NAME_TYPE_DESC:
-		return fmt.Sprintf("#%d:#%d", bytesToInt(jc.value[:2]),
-			bytesToInt(jc.value[2:]))
+		return fmt.Sprintf("#%d:#%d", bytesToInt(cst.value[:2]),
+			bytesToInt(cst.value[2:]))
 
 	case TAG_METHOD_HANDLE:
 		// TODO
@@ -430,12 +430,12 @@ func (jc jconst) String() string {
 	return "(unknown)"
 }
 
-func (jc *jclass) StringConstantsIndent(indent int) string {
+func (cls *jclass) StringConstantsIndent(indent int) string {
 	var buffer bytes.Buffer
 
 	lineStart := strings.Repeat(" ", indent)
 
-	for idx, cst := range jc.constants {
+	for idx, cst := range cls.constants {
 		if idx == 0 {
 			continue
 		}
@@ -446,24 +446,24 @@ func (jc *jclass) StringConstantsIndent(indent int) string {
 	return buffer.String()
 }
 
-func printClass(filename string, jc jclass) {
+func printClass(filename string, cls jclass) {
 	fmt.Printf("%s:\n"+
 		"  version:  %s\n"+
 		"  access: %s\n"+
 		"  constants:\n%s\n",
-		filename, jc.Version(), jc.StringFlags(), jc.StringConstantsIndent(4))
+		filename, cls.Version(), cls.StringFlags(), cls.StringConstantsIndent(4))
 }
 
 func main() {
 	flag.Parse()
 
 	for _, source := range flag.Args() {
-		jc, err := inspectFilename(source)
+		cls, err := inspectFilename(source)
 		if err != nil {
 			fmt.Printf("Can't inspect '%s': %s\n", source, err)
 			os.Exit(1)
 		}
 
-		printClass(source, jc)
+		printClass(source, cls)
 	}
 }
