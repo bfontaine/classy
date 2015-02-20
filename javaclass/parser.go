@@ -154,16 +154,14 @@ func ParseClassFromFile(f *os.File) (JClass, error) {
 		return cls, err
 	}
 
-	/* TODO
-
 	// interfaces
 	var interfacesCount u2
 	if err := readU2(f, &interfacesCount); err != nil {
 		return cls, err
 	}
 
-	interfaces := make([]byte, interfacesCount)
-	if err := parseInterfaces(&cls, interfaces); err != nil {
+	cls.interfaces = make([]u2, interfacesCount)
+	if err := readBinary(f, &cls.interfaces); err != nil {
 		return cls, err
 	}
 
@@ -173,32 +171,34 @@ func ParseClassFromFile(f *os.File) (JClass, error) {
 		return cls, err
 	}
 
-	fields := make([]byte, fieldsCount)
-	if err := parseFields(&cls, fields); err != nil {
-		return cls, err
-	}
+	/*
 
-	// methods
-	var methodsCount u2
-	if err := readU2(f, &methodsCount); err != nil {
-		return cls, err
-	}
+		fields := make([]byte, fieldsCount)
+		if err := parseFields(&cls, fields); err != nil {
+			return cls, err
+		}
 
-	methods := make([]byte, methodsCount)
-	if err := parseMethods(&cls, methods); err != nil {
-		return cls, err
-	}
+		// methods
+		var methodsCount u2
+		if err := readU2(f, &methodsCount); err != nil {
+			return cls, err
+		}
 
-	// attributes
-	var attrsCount u2
-	if err := readU2(f, &attrsCount); err != nil {
-		return cls, err
-	}
+		methods := make([]byte, methodsCount)
+		if err := parseMethods(&cls, methods); err != nil {
+			return cls, err
+		}
 
-	attrs := make([]byte, attrsCount)
-	if err := parseAttrs(&cls, attrs); err != nil {
-		return cls, err
-	}
+		// attributes
+		var attrsCount u2
+		if err := readU2(f, &attrsCount); err != nil {
+			return cls, err
+		}
+
+		attrs := make([]byte, attrsCount)
+		if err := parseAttrs(&cls, attrs); err != nil {
+			return cls, err
+		}
 	*/
 
 	return cls, nil
