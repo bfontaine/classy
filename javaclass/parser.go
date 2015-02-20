@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 )
@@ -78,7 +79,72 @@ func readU1(r io.Reader, data *u1) error {
 	return nil
 }
 
-func parseFields(cls *JClass, fields []byte) error {
+func parseConstantPool(cls *JClass, constantPoolSize u2, r io.Reader) error {
+
+	var tag u1
+	var size, index u2
+	var data []byte
+
+	cls.initConstantPool(constantPoolSize)
+
+	for index = 1; index < constantPoolSize; index++ {
+		if err := readU1(r, &tag); err != nil {
+			return err
+		}
+
+		switch tag {
+		case TAG_STRING:
+			if err := readU2(r, &size); err != nil {
+				return err
+			}
+
+		case TAG_CLASS_REF:
+			fallthrough
+		case TAG_STRING_REF:
+			fallthrough
+		case TAG_METHOD_TYPE:
+			size = 2
+
+		case TAG_METHOD_HANDLE:
+			size = 3
+
+		case TAG_INT:
+			fallthrough
+		case TAG_FLOAT:
+			fallthrough
+		case TAG_FIELD_REF:
+			fallthrough
+		case TAG_METHOD_REF:
+			fallthrough
+		case TAG_INTERFACE_METHOD_REF:
+			fallthrough
+		case TAG_NAME_TYPE_DESC:
+			fallthrough
+		case TAG_INVOKE_DYN:
+			size = 4
+
+		case TAG_LONG:
+			fallthrough
+		case TAG_DOUBLE:
+			// 8-bytes constants take two slots in the constant pool table
+			index += 1
+			size = 8
+
+		default:
+			return errors.New(fmt.Sprintf("Unknown tag '%d'", tag))
+		}
+
+		data = make([]byte, size)
+		if err := readBinary(r, &data); err != nil {
+			return err
+		}
+		cls.addConstant(index, tag, data)
+	}
+
+	return nil
+}
+
+func parseFields(cls *JClass, fieldsSize u2, r io.Reader) error {
 	// TODO
 	return nil
 }
@@ -124,7 +190,7 @@ func ParseClassFromFile(f *os.File) (JClass, error) {
 	}
 
 	// constant pool
-	if err := cls.parseConstantPool(constantPoolSize, f); err != nil {
+	if err := parseConstantPool(&cls, constantPoolSize, f); err != nil {
 		return cls, err
 	}
 
@@ -149,7 +215,7 @@ func ParseClassFromFile(f *os.File) (JClass, error) {
 		return cls, err
 	}
 
-	cls.interfaces = make([]u2, interfacesCount)
+	cls.initInterfaces(interfacesCount)
 	if err := readBinary(f, &cls.interfaces); err != nil {
 		return cls, err
 	}
@@ -160,13 +226,11 @@ func ParseClassFromFile(f *os.File) (JClass, error) {
 		return cls, err
 	}
 
+	if err := parseFields(&cls, fieldsCount, f); err != nil {
+		return cls, err
+	}
+
 	/*
-
-		fields := make([]byte, fieldsCount)
-		if err := parseFields(&cls, fields); err != nil {
-			return cls, err
-		}
-
 		// methods
 		var methodsCount u2
 		if err := readU2(f, &methodsCount); err != nil {

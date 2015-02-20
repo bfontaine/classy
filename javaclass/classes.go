@@ -2,97 +2,37 @@ package javaclass
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
-	"io"
 	"strings"
 )
 
 type JClass struct {
 	majorVersion u2
 	minorVersion u2
+	accessFlags  u2
 
-	accessFlags u2
-
-	constants []JConst
+	constants  []JConst
+	fields     []JField
+	interfaces []u2
 
 	classIndex      u2
 	superClassIndex u2
-
-	interfaces []u2
 }
 
 func (cls *JClass) initConstantPool(size u2) {
 	cls.constants = make([]JConst, size)
 }
 
-func (cls *JClass) addConstant(index u2, tag u1, data []byte) {
-	cls.constants[index] = JConst{tag, data}
+func (cls *JClass) initFields(size u2) {
+	cls.fields = make([]JField, size)
 }
 
-func (cls *JClass) parseConstantPool(constantPoolSize u2, r io.Reader) error {
+func (cls *JClass) initInterfaces(size u2) {
+	cls.interfaces = make([]u2, size)
+}
 
-	var tag u1
-	var size, index u2
-	var data []byte
-
-	cls.initConstantPool(constantPoolSize)
-
-	for index = 1; index < constantPoolSize; index++ {
-		if err := readU1(r, &tag); err != nil {
-			return err
-		}
-
-		switch tag {
-		case TAG_STRING:
-			if err := readU2(r, &size); err != nil {
-				return err
-			}
-
-		case TAG_CLASS_REF:
-			fallthrough
-		case TAG_STRING_REF:
-			fallthrough
-		case TAG_METHOD_TYPE:
-			size = 2
-
-		case TAG_METHOD_HANDLE:
-			size = 3
-
-		case TAG_INT:
-			fallthrough
-		case TAG_FLOAT:
-			fallthrough
-		case TAG_FIELD_REF:
-			fallthrough
-		case TAG_METHOD_REF:
-			fallthrough
-		case TAG_INTERFACE_METHOD_REF:
-			fallthrough
-		case TAG_NAME_TYPE_DESC:
-			fallthrough
-		case TAG_INVOKE_DYN:
-			size = 4
-
-		case TAG_LONG:
-			fallthrough
-		case TAG_DOUBLE:
-			// 8-bytes constants take two slots in the constant pool table
-			index += 1
-			size = 8
-
-		default:
-			return errors.New(fmt.Sprintf("Unknown tag '%d'", tag))
-		}
-
-		data = make([]byte, size)
-		if err := readBinary(r, &data); err != nil {
-			return err
-		}
-		cls.addConstant(index, tag, data)
-	}
-
-	return nil
+func (cls *JClass) addConstant(index u2, tag u1, data []byte) {
+	cls.constants[index] = JConst{tag, data}
 }
 
 func (cls *JClass) Version() string {
