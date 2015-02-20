@@ -381,7 +381,7 @@ func (jc jconst) valueAsInt64() uint64 {
 func (jc jconst) String() string {
 	switch jc.tag {
 	case TAG_STRING:
-		return fmt.Sprintf("String(\"%s\")", jc.valueAsString())
+		return jc.valueAsString()
 
 	case TAG_INT:
 		var v int32
@@ -404,16 +404,27 @@ func (jc jconst) String() string {
 		return fmt.Sprintf("Double(%d)", v)
 
 	case TAG_CLASS_REF:
+		fallthrough
+	case TAG_STRING_REF:
+		fallthrough
+	case TAG_METHOD_TYPE:
+		return fmt.Sprintf("#%d", bytesToInt(jc.value))
+
+	case TAG_FIELD_REF:
+		fallthrough
+	case TAG_METHOD_REF:
+		fallthrough
+	case TAG_INTERFACE_METHOD_REF:
+		fallthrough
+	case TAG_NAME_TYPE_DESC:
+		return fmt.Sprintf("#%d:#%d", bytesToInt(jc.value[:2]),
+			bytesToInt(jc.value[2:]))
+
+	case TAG_METHOD_HANDLE:
 		// TODO
 
-	case TAG_STRING_REF:
-	case TAG_FIELD_REF:
-	case TAG_METHOD_REF:
-	case TAG_INTERFACE_METHOD_REF:
-	case TAG_NAME_TYPE_DESC:
-	case TAG_METHOD_HANDLE:
-	case TAG_METHOD_TYPE:
 	case TAG_INVOKE_DYN:
+		// TODO
 	}
 
 	return "(unknown)"
