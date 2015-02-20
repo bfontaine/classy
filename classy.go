@@ -81,7 +81,7 @@ func readInt(r io.Reader, data *int, length int) error {
 	return nil
 }
 
-func (jc *jclass) addConstant(tag int, size int, data []byte) {
+func (jc *jclass) addConstant(index, tag, size int, data []byte) {
 	// TODO
 }
 
@@ -89,11 +89,6 @@ func (jc *jclass) parseConstantPool(constantPoolSize int, r io.Reader) error {
 
 	var tag, size int
 	var data []byte
-
-	// skip the first index
-	if err := readInt(r, &tag, 2); err != nil {
-		return err
-	}
 
 	for index := 1; index < constantPoolSize; index++ {
 		if err := readInt(r, &tag, 1); err != nil {
@@ -105,32 +100,39 @@ func (jc *jclass) parseConstantPool(constantPoolSize int, r io.Reader) error {
 			if err := readInt(r, &size, 2); err != nil {
 				return err
 			}
-			break
 
 		case TAG_CLASS_REF:
+			fallthrough
 		case TAG_STRING_REF:
+			fallthrough
 		case TAG_METHOD_TYPE:
 			size = 2
-			break
 
 		case TAG_METHOD_HANDLE:
 			size = 3
-			break
 
 		case TAG_INT:
+			fallthrough
 		case TAG_FLOAT:
+			fallthrough
 		case TAG_FIELD_REF:
+			fallthrough
 		case TAG_METHOD_REF:
+			fallthrough
 		case TAG_INTERFACE_METHOD_REF:
+			fallthrough
 		case TAG_NAME_TYPE_DESC:
+			fallthrough
 		case TAG_INVOKE_DYN:
 			size = 4
-			break
 
 		case TAG_LONG:
+			fallthrough
 		case TAG_DOUBLE:
+			size = 4
+			// 8-bytes constants take two slots in the constant pool table
+			index += 1
 			size = 8
-			break
 
 		default:
 			return errors.New(fmt.Sprintf("Unknown tag '%d'", tag))
@@ -140,7 +142,7 @@ func (jc *jclass) parseConstantPool(constantPoolSize int, r io.Reader) error {
 		if err := readBinary(r, &data); err != nil {
 			return err
 		}
-		jc.addConstant(tag, size, data)
+		jc.addConstant(index, tag, size, data)
 	}
 
 	return nil
