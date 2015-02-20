@@ -31,6 +31,11 @@ const (
 	TAG_INVOKE_DYN           = 18
 )
 
+var (
+	ErrNotEnoughBytes   = errors.New("Can't read enough bytes")
+	ErrWrongMagicNumber = errors.New("Wrong magic number")
+)
+
 type jclass struct {
 	majorVersion int
 	minorVersion int
@@ -50,7 +55,7 @@ func readBytes(f *os.File, buff []byte) error {
 	}
 
 	if n < len(buff) {
-		return errors.New("Can't read enough bytes")
+		return ErrNotEnoughBytes
 	}
 
 	return nil
@@ -176,7 +181,7 @@ func inspectFilename(source string) (jclass, error) {
 	}
 
 	if !bytes.Equal(buf4, []byte{0xCA, 0xFE, 0xBA, 0xBE}) {
-		return jclass{}, errors.New("Bad magic number")
+		return jclass{}, ErrWrongMagicNumber
 	}
 
 	jc := jclass{}
