@@ -35,6 +35,8 @@ const (
 	ACC_ENUM       = 0x4000
 )
 
-type u1 uint8
-type u2 uint16
-type u4 uint32
+type (
+	u1 uint8
+	u2 uint16
+	u4 uint32
+)
