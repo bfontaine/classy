@@ -1,3 +1,6 @@
+/*
+This packages provides a way to parse .class Java files.
+*/
 package jvm
 
 // Tags used by the JVM

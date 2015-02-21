@@ -17,5 +17,4 @@ wrong.
 
 ## TODO
 
-* Write documentation
 * Write tests

@@ -190,11 +190,6 @@ func parseFields(cls *JClass, fieldsCount u2, r io.Reader) error {
 
 	cls.initFields(fieldsCount)
 
-	// accessFlags     u2
-	// nameIndex       u2
-	// descriptorIndex u2
-	// attributes      []JAttr
-
 	for index = 0; index < fieldsCount; index++ {
 		field := JField{}
 
@@ -234,6 +229,7 @@ func parseAttrs(cls *JClass, attrs []byte) error {
 	return nil
 }
 
+// ParseClassFromFiles takes an open file and parses a JClass from it.
 func ParseClassFromFile(f *os.File) (JClass, error) {
 
 	// magic number
