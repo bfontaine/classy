@@ -7,22 +7,22 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/bfontaine/goclassy/javaclass"
+	"github.com/bfontaine/goclassy/jvm"
 	"os"
 )
 
-func inspectFilename(source string) (javaclass.JClass, error) {
+func inspectFilename(source string) (jvm.JClass, error) {
 	f, err := os.Open(source)
 	if err != nil {
-		return javaclass.JClass{}, err
+		return jvm.JClass{}, err
 	}
 
 	defer f.Close()
 
-	return javaclass.ParseClassFromFile(f)
+	return jvm.ParseClassFromFile(f)
 }
 
-func printClass(filename string, cls javaclass.JClass) {
+func printClass(filename string, cls jvm.JClass) {
 	fmt.Printf("%s:\n"+
 		"  class: %s\n"+
 		"  version: %s\n"+

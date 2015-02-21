@@ -1,4 +1,4 @@
-package javaclass
+package jvm
 
 import (
 	"bytes"
