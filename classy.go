@@ -30,6 +30,7 @@ func stringConstantsIndent(cls jvm.JClass, indent int) string {
 	lineStart := strings.Repeat(" ", indent)
 
 	for idx, cst := range cls.Constants() {
+		// the first index of the constants should be ignored
 		if idx == 0 {
 			continue
 		}

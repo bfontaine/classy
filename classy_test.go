@@ -9,5 +9,5 @@ import (
 func TestStringFlagsEmptyClass(t *testing.T) {
 	jc := jvm.JClass{}
 
-	assert.Equal(t, stringFlags(&jc), "")
+	assert.Equal(t, "", stringFlags(&jc))
 }

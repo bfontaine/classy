@@ -17,9 +17,14 @@ func (cst JConst) valueAsString() string {
 	return string(cst.value)
 }
 
+// dumpValue takes a pointer on something and "cast" this const's value in it.
+// If the receiver type is too small the result will be silently truncated.
 func (cst JConst) dumpValue(ret interface{}) error {
+	if ret == nil {
+		return ErrNullPointer
+	}
 	buf := bytes.NewBuffer(cst.value)
-	err := binary.Read(buf, binary.BigEndian, &ret)
+	err := binary.Read(buf, binary.BigEndian, ret)
 	return err
 }
 

@@ -3,6 +3,10 @@ This packages provides a way to parse .class Java files.
 */
 package jvm
 
+import (
+	"errors"
+)
+
 // Tags used by the JVM
 const (
 	TAG_STRING               = 1
@@ -39,4 +43,10 @@ type (
 	u1 uint8
 	u2 uint16
 	u4 uint32
+)
+
+var (
+	ErrNotEnoughBytes   = errors.New("Can't read enough bytes")
+	ErrWrongMagicNumber = errors.New("Wrong magic number")
+	ErrNullPointer      = errors.New("Null pointer exception")
 )

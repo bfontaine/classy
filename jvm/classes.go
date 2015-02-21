@@ -68,6 +68,7 @@ func (cls *JClass) ClassName() string {
 }
 
 // Constants returns all the constants of this class.
+// Note that the first index (0) should be ignored.
 func (cls *JClass) Constants() []JConst {
 	return cls.constants
 }

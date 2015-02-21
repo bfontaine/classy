@@ -8,13 +8,13 @@ import (
 func TestEmptyValueAsString(t *testing.T) {
 	cst := JConst{}
 
-	assert.Equal(t, cst.valueAsString(), "")
+	assert.Equal(t, "", cst.valueAsString())
 }
 
 func TestValueAsString(t *testing.T) {
 	cst := JConst{value: []byte{'h', 'e', 'l', 'l', 'o'}}
 
-	assert.Equal(t, cst.valueAsString(), "hello")
+	assert.Equal(t, "hello", cst.valueAsString())
 }
 
 func TestDumpValueNilArg(t *testing.T) {
@@ -29,5 +29,24 @@ func TestDumpValueTooSmallArgType(t *testing.T) {
 	var res int16
 	err := cst.dumpValue(&res)
 
+	assert.Nil(t, err)
+	// result is truncated
+	assert.Equal(t, 0x0101, res)
+}
+
+func TestDumpValueTooLargeArgType(t *testing.T) {
+	cst := JConst{value: []byte{1, 1, 1, 1}}
+	var res int64
+	err := cst.dumpValue(&res)
+
 	assert.NotNil(t, err)
+}
+
+func TestDumpValue(t *testing.T) {
+	cst := JConst{value: []byte{1, 1, 1, 1}}
+	var res uint32
+	err := cst.dumpValue(&res)
+
+	assert.Nil(t, err)
+	assert.EqualValues(t, 0x1010101, res)
 }

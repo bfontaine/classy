@@ -9,11 +9,6 @@ import (
 	"os"
 )
 
-var (
-	ErrNotEnoughBytes   = errors.New("Can't read enough bytes")
-	ErrWrongMagicNumber = errors.New("Wrong magic number")
-)
-
 func readBytes(f *os.File, buff []byte) error {
 	n, err := f.Read(buff)
 
