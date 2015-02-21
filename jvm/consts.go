@@ -23,10 +23,6 @@ func (cst JConst) dumpValue(ret interface{}) error {
 	return err
 }
 
-func (cst JConst) valueAsInt64() uint64 {
-	return binary.BigEndian.Uint64(cst.value)
-}
-
 func (cst JConst) String() string {
 	switch cst.tag {
 	case TAG_STRING:
