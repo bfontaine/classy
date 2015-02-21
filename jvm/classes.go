@@ -42,7 +42,7 @@ func (cls *JClass) addField(index u2, field JField) {
 
 // return the constant at the given index in the pool, following references if
 // there are some.
-func (cls JClass) resolveConstantIndex(index u2) JConst {
+func (cls *JClass) resolveConstantIndex(index u2) JConst {
 	cst := cls.constants[index]
 
 	switch cst.tag {
@@ -58,22 +58,22 @@ func (cls JClass) resolveConstantIndex(index u2) JConst {
 }
 
 // HasAccessFlag tests if the class has the given access flag.
-func (cls JClass) HasAccessFlag(flag u2) bool {
+func (cls *JClass) HasAccessFlag(flag u2) bool {
 	return cls.accessFlags&flag == flag
 }
 
 // ClassName returns the class name as a string.
-func (cls JClass) ClassName() string {
+func (cls *JClass) ClassName() string {
 	return cls.resolveConstantIndex(cls.classIndex).valueAsString()
 }
 
 // Constants returns all the constants of this class.
-func (cls JClass) Constants() []JConst {
+func (cls *JClass) Constants() []JConst {
 	return cls.constants
 }
 
 // JavaVersion returns the Java Version used by a class.
-func (cls JClass) JavaVersion() string {
+func (cls *JClass) JavaVersion() string {
 	// we could also use the minor version here
 	switch cls.majorVersion {
 	case 45:
