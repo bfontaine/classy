@@ -25,5 +25,9 @@ func TestDumpValueNilArg(t *testing.T) {
 }
 
 func TestDumpValueTooSmallArgType(t *testing.T) {
+	cst := JConst{value: []byte{1, 1, 1, 1}}
+	var res int16
+	err := cst.dumpValue(&res)
 
+	assert.NotNil(t, err)
 }
