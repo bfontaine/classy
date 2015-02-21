@@ -9,3 +9,6 @@ $(BIN): $(SOURCES)
 
 clean:
 	$(RM) $(BIN)
+
+check:
+	go test -v ./...
