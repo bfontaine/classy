@@ -41,7 +41,7 @@ func (cst JConst) String() string {
 	case TAG_FLOAT:
 		var v float32
 		cst.dumpValue(&v)
-		return fmt.Sprintf("Integer(%d)", v)
+		return fmt.Sprintf("Float(%f)", v)
 
 	case TAG_LONG:
 		var v float64
@@ -51,7 +51,7 @@ func (cst JConst) String() string {
 	case TAG_DOUBLE:
 		var v int64
 		cst.dumpValue(&v)
-		return fmt.Sprintf("Double(%d)", v)
+		return fmt.Sprintf("Double(%f)", v)
 
 	case TAG_CLASS_REF:
 		fallthrough
