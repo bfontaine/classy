@@ -9,10 +9,14 @@ This is a work in progress, and I use this project to learn Go so the code is
 far from perfect. Feel free to open an issue if you think I’m doing something
 wrong.
 
-## Build
+## Install
 
-    make
+    go get github.com/bfontaine/classy
+
+### Dependencies
+
+* Go 1.1 or higher
 
 ## Usage
 
-    ./classy <class file> [<class file> ...]
+    $ classy <class file> [<class file> ...]
