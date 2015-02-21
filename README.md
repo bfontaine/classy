@@ -13,8 +13,3 @@ wrong.
 ## Usage
 
     ./classy <class file> [<class file> ...]
-
-
-## TODO
-
-* Write tests
