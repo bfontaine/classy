@@ -1,7 +1,5 @@
 package jvm
 
-import ()
-
 type JField struct {
 	accessFlags     u2
 	nameIndex       u2

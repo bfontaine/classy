@@ -1,7 +1,6 @@
 package jvm
 
-import ()
-
+// Tags used by the JVM
 const (
 	TAG_STRING               = 1
 	TAG_INT                  = 3
@@ -17,7 +16,10 @@ const (
 	TAG_METHOD_HANDLE        = 15
 	TAG_METHOD_TYPE          = 16
 	TAG_INVOKE_DYN           = 18
+)
 
+// Access flags, used on both fields and classes
+const (
 	ACC_PUBLIC     = 0x0001
 	ACC_FINAL      = 0x0010
 	ACC_SUPER      = 0x0020

@@ -5,10 +5,12 @@ package main
 //  - http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"github.com/bfontaine/goclassy/jvm"
 	"os"
+	"strings"
 )
 
 func inspectFilename(source string) (jvm.JClass, error) {
@@ -22,6 +24,41 @@ func inspectFilename(source string) (jvm.JClass, error) {
 	return jvm.ParseClassFromFile(f)
 }
 
+func stringConstantsIndent(cls jvm.JClass, indent int) string {
+	var buffer bytes.Buffer
+
+	lineStart := strings.Repeat(" ", indent)
+
+	for idx, cst := range cls.Constants() {
+		if idx == 0 {
+			continue
+		}
+
+		buffer.WriteString(fmt.Sprintf("%s%3d = %v\n", lineStart, idx, cst))
+	}
+
+	return buffer.String()
+}
+
+func stringFlags(cls *jvm.JClass) string {
+	var buffer bytes.Buffer
+
+	if cls.HasAccessFlag(jvm.ACC_PUBLIC) {
+		buffer.WriteString("public ")
+	}
+	if cls.HasAccessFlag(jvm.ACC_FINAL) {
+		buffer.WriteString("final ")
+	}
+	if cls.HasAccessFlag(jvm.ACC_INTERFACE) {
+		buffer.WriteString("interface ")
+	}
+	if cls.HasAccessFlag(jvm.ACC_ABSTRACT) {
+		buffer.WriteString("abstract ")
+	}
+
+	return buffer.String()
+}
+
 func printClass(filename string, cls jvm.JClass) {
 	fmt.Printf("%s:\n"+
 		"  class: %s\n"+
@@ -30,9 +67,9 @@ func printClass(filename string, cls jvm.JClass) {
 		"  constants:\n%s\n",
 		filename,
 		cls.ClassName(),
-		cls.Version(),
-		cls.StringFlags(),
-		cls.StringConstantsIndent(4))
+		cls.JavaVersion(),
+		stringFlags(&cls),
+		stringConstantsIndent(cls, 4))
 }
 
 func main() {
