@@ -1,6 +1,6 @@
 package main
 
-// most of the code here is based on informations found here:
+// most of the code is based on informations found here:
 //  - https://en.wikipedia.org/wiki/Java_class_file
 //  - http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4
 
