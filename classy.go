@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"github.com/bfontaine/goclassy/jvm"
+	"github.com/bfontaine/classy/jvm"
 	"os"
 	"strings"
 )

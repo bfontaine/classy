@@ -1,7 +1,7 @@
 # Classy
 
-[![GoDoc](https://godoc.org/github.com/bfontaine/goclassy?status.svg)](https://godoc.org/github.com/bfontaine/goclassy)
-[![Build Status](https://travis-ci.org/bfontaine/goclassy.svg)](https://travis-ci.org/bfontaine/goclassy)
+[![GoDoc](https://godoc.org/github.com/bfontaine/classy?status.svg)](https://godoc.org/github.com/bfontaine/classy)
+[![Build Status](https://travis-ci.org/bfontaine/classy.svg)](https://travis-ci.org/bfontaine/classy)
 
 `classy` is a little tool written in Go to inspect Java `class` files.
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/bfontaine/goclassy/jvm"
+	"github.com/bfontaine/classy/jvm"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
