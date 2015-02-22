@@ -256,5 +256,4 @@ func TestStringInvokeDynamic(t *testing.T) {
 func TestStringUnknownTag(t *testing.T) {
 	cst := JConst{tag: 123, value: []byte{0, 42}}
 	assert.Equal(t, "(unknown)", cst.String())
-	// TODO
 }
