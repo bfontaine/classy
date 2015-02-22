@@ -91,11 +91,25 @@ func TestStringNullInteger(t *testing.T) {
 }
 
 func TestStringPositiveFloat(t *testing.T) {
-	// TODO
+	cst := JConst{tag: TAG_FLOAT, value: []byte{0x42, 0x28, 0, 0}}
+
+	var res float32
+	err := cst.dumpValue(&res)
+
+	assert.Nil(t, err)
+	assert.Equal(t, float32(42.0), res)
+	assert.Equal(t, "Float(42.000000)", cst.String())
 }
 
 func TestStringNegativeFloat(t *testing.T) {
-	// TODO
+	cst := JConst{tag: TAG_FLOAT, value: []byte{0xc2, 0x28, 0xb8, 0x52}}
+
+	var res float32
+	err := cst.dumpValue(&res)
+
+	assert.Nil(t, err)
+	assert.Equal(t, float32(-42.18), res)
+	assert.Equal(t, "Float(-42.180000)", cst.String())
 }
 
 func TestStringNullFloat(t *testing.T) {
@@ -110,15 +124,37 @@ func TestStringNullFloat(t *testing.T) {
 }
 
 func TestStringPositiveLong(t *testing.T) {
-	// TODO
+	cst := JConst{tag: TAG_LONG, value: []byte{0, 0, 0, 0, 0, 0, 0, 1}}
+
+	var res int64
+	err := cst.dumpValue(&res)
+
+	assert.Nil(t, err)
+	assert.Equal(t, int64(1), res)
+	assert.Equal(t, "Long(1)", cst.String())
 }
 
 func TestStringNegativeLong(t *testing.T) {
-	// TODO
+	cst := JConst{tag: TAG_LONG, value: []byte{0xFF, 0xFF, 0xFF, 0xFF,
+		0xFF, 0xFF, 0xFF, 0xD6}}
+
+	var res int64
+	err := cst.dumpValue(&res)
+
+	assert.Nil(t, err)
+	assert.Equal(t, int64(-42), res)
+	assert.Equal(t, "Long(-42)", cst.String())
 }
 
 func TestStringNullLong(t *testing.T) {
-	// TODO
+	cst := JConst{tag: TAG_LONG, value: []byte{0, 0, 0, 0, 0, 0, 0, 0}}
+
+	var res int64
+	err := cst.dumpValue(&res)
+
+	assert.Nil(t, err)
+	assert.Equal(t, int64(0), res)
+	assert.Equal(t, "Long(0)", cst.String())
 }
 
 func TestStringPositiveDouble(t *testing.T) {
