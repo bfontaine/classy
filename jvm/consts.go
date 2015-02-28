@@ -53,20 +53,11 @@ func (cst JConst) String() string {
 		cst.dumpValue(&v)
 		return fmt.Sprintf("Double(%.6f)", v)
 
-	case TAG_CLASS_REF:
-		fallthrough
-	case TAG_STRING_REF:
-		fallthrough
-	case TAG_METHOD_TYPE:
+	case TAG_CLASS_REF, TAG_STRING_REF, TAG_METHOD_TYPE:
 		return fmt.Sprintf("#%d", bytesToInt(cst.value))
 
-	case TAG_FIELD_REF:
-		fallthrough
-	case TAG_METHOD_REF:
-		fallthrough
-	case TAG_INTERFACE_METHOD_REF:
-		fallthrough
-	case TAG_NAME_TYPE_DESC:
+	case TAG_FIELD_REF, TAG_METHOD_REF, TAG_INTERFACE_METHOD_REF,
+		TAG_NAME_TYPE_DESC:
 		return fmt.Sprintf("#%d:#%d", bytesToInt(cst.value[:2]),
 			bytesToInt(cst.value[2:]))
 

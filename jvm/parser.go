@@ -104,34 +104,17 @@ func parseConstantPool(cls *JClass, constantPoolSize u2, r io.Reader) error {
 				return err
 			}
 
-		case TAG_CLASS_REF:
-			fallthrough
-		case TAG_STRING_REF:
-			fallthrough
-		case TAG_METHOD_TYPE:
+		case TAG_CLASS_REF, TAG_STRING_REF, TAG_METHOD_TYPE:
 			size = 2
 
 		case TAG_METHOD_HANDLE:
 			size = 3
 
-		case TAG_INT:
-			fallthrough
-		case TAG_FLOAT:
-			fallthrough
-		case TAG_FIELD_REF:
-			fallthrough
-		case TAG_METHOD_REF:
-			fallthrough
-		case TAG_INTERFACE_METHOD_REF:
-			fallthrough
-		case TAG_NAME_TYPE_DESC:
-			fallthrough
-		case TAG_INVOKE_DYN:
+		case TAG_INT, TAG_FLOAT, TAG_FIELD_REF, TAG_METHOD_REF,
+			TAG_INTERFACE_METHOD_REF, TAG_NAME_TYPE_DESC, TAG_INVOKE_DYN:
 			size = 4
 
-		case TAG_LONG:
-			fallthrough
-		case TAG_DOUBLE:
+		case TAG_LONG, TAG_DOUBLE:
 			// 8-bytes constants take two slots in the constant pool table
 			index += 1
 			size = 8

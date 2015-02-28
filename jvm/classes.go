@@ -46,11 +46,7 @@ func (cls *JClass) resolveConstantIndex(index u2) JConst {
 	cst := cls.constants[index]
 
 	switch cst.tag {
-	case TAG_CLASS_REF:
-		fallthrough
-	case TAG_STRING_REF:
-		fallthrough
-	case TAG_METHOD_TYPE:
+	case TAG_CLASS_REF, TAG_STRING_REF, TAG_METHOD_TYPE:
 		return cls.resolveConstantIndex(bytesToU2(cst.value))
 	default:
 		return cst
