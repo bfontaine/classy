@@ -1,4 +1,4 @@
-# Classy
+# Classy.
 
 [![GoDoc](https://godoc.org/github.com/bfontaine/classy?status.svg)](https://godoc.org/github.com/bfontaine/classy)
 [![Build Status](https://travis-ci.org/bfontaine/classy.svg)](https://travis-ci.org/bfontaine/classy)
