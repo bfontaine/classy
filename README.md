@@ -11,7 +11,7 @@ wrong.
 
 ## Install
 
-    go get github.com/bfontaine/classy
+    go install github.com/bfontaine/classy
 
 ### Dependencies
 
